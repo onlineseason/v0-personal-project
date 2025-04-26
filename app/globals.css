@@ -69,4 +69,3 @@
 .hero-gradient {
   @apply bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-800 dark:to-purple-800;
 }
-

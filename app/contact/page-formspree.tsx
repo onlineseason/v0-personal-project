@@ -1,32 +1,40 @@
 "use client"
 
+import type React from "react"
+
 import { motion } from "framer-motion"
-import { useState, useRef } from "react"
+import { useState } from "react"
 import { Github, Linkedin, Mail, Twitter, Facebook, Instagram, BookOpen, Loader2 } from "lucide-react"
 import Link from "next/link"
-import { submitContactForm } from "@/app/actions/contact"
 
 export default function ContactPage() {
   const [formState, setFormState] = useState<"idle" | "submitting" | "success" | "error">("idle")
-  const [errorMessage, setErrorMessage] = useState<string>("")
-  const formRef = useRef<HTMLFormElement>(null)
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
     setFormState("submitting")
 
-    try {
-      const response = await submitContactForm(formData)
+    const form = event.currentTarget
+    const formData = new FormData(form)
 
-      if (response.success) {
+    try {
+      // Replace this URL with your Formspree form ID
+      const response = await fetch("https://formspree.io/f/YOUR_FORM_ID", {
+        method: "POST",
+        body: formData,
+        headers: {
+          Accept: "application/json",
+        },
+      })
+
+      if (response.ok) {
         setFormState("success")
-        formRef.current?.reset()
+        form.reset()
       } else {
         setFormState("error")
-        setErrorMessage(response.message || "There was an error sending your message. Please try again.")
       }
     } catch (error) {
       setFormState("error")
-      setErrorMessage("There was an error sending your message. Please try again.")
     }
   }
 
@@ -57,7 +65,10 @@ export default function ContactPage() {
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <h2 className="text-2xl font-bold">Get in Touch</h2>
-          <form ref={formRef} action={handleSubmit} className="mt-6 space-y-6">
+          <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+            <input type="hidden" name="_subject" value="New contact form submission" />
+            <input type="hidden" name="_replyto" value="%email%" />
+
             <div>
               <label htmlFor="name" className="block text-sm font-medium">
                 Name
@@ -143,7 +154,9 @@ export default function ContactPage() {
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm font-medium text-red-800 dark:text-red-200">{errorMessage}</p>
+                    <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                      There was an error sending your message. Please try again.
+                    </p>
                   </div>
                 </div>
               </div>

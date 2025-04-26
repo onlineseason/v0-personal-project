@@ -46,4 +46,3 @@ export const projects = [
     tags: ["Agriculture", "Organic", "Sustainability"],
   },
 ]
-

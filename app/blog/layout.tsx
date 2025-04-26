@@ -9,4 +9,3 @@ export default function BlogLayout({
 }) {
   return <div className="min-h-screen bg-background">{children}</div>
 }
-
