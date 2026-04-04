@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Dorna Raj Budthapa - Entrepreneur | Engineer | Digital Advocate",
   description: "Personal website of Dorna Raj Budthapa, showcasing projects, blog posts, and professional journey.",
-    generator: 'v0.dev'
+    generator: 'v0.app'
 }
 
 export default function RootLayout({
