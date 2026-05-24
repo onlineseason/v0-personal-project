@@ -2,6 +2,7 @@
 
 import { z } from "zod"
 import nodemailer from "nodemailer"
+import { supabase } from "@/lib/supabase"
 
 // Form validation schema
 const contactFormSchema = z.object({
@@ -27,6 +28,23 @@ export async function submitContactForm(formData: FormData) {
         success: false,
         errors: result.error.flatten().fieldErrors,
       }
+    }
+
+    // Save contact message to Supabase
+    const { error: dbError } = await supabase
+      .from('contact_messages')
+      .insert([
+        {
+          name,
+          email,
+          message,
+          created_at: new Date().toISOString(),
+        }
+      ])
+
+    if (dbError) {
+      console.error("Supabase error:", dbError)
+      // Continue with email sending even if DB fails
     }
 
     // Create email transporter
