@@ -1,9 +1,0 @@
-name = "v0-personal-project"
-compatibility_date = "2024-01-01"
-
-[build]
-command = "npm run build"
-cwd = "./"
-
-[env.production]
-vars = { ENVIRONMENT = "production" }
