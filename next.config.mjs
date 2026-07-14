@@ -6,13 +6,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  
   eslint: {
     ignoreDuringBuilds: true,
-  },
-  // Cloudflare Pages compatibility
-  experimental: {
-    isrMemoryCacheSize: 0,
   },
   // Required for Cloudflare Pages
   headers: async () => [
