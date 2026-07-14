@@ -1,0 +1,31 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "web",
+  "main": "worker.ts",
+  "site": {
+    "bucket": "./public"
+  },
+  "build": {
+    "command": "bun run build",
+    "cwd": ".",
+    "watch_paths": ["src/**/*.ts", "app/**/*.tsx"]
+  },
+  "env": {
+    "production": {
+      "name": "web",
+      "route": "dornaseason.online/*",
+      "zone_name": "dornaseason.online"
+    }
+  },
+  "triggers": {
+    "crons": []
+  },
+  "vars": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://fdfiirizrbsnecqplpyx.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkZmlpcml6cmJzbmVjcXBscHgiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc3OTYzMzE5OSwiZXhwIjoyMDk1MjA5MTk5fQ.Eweyw42ZhJ8TpUPkCVEJfiWILF93B1RaV9AFeomls5M"
+  },
+  "compatibility_date": "2026-07-14",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ]
+}
