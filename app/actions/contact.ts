@@ -1,13 +1,13 @@
 "use server"
 
 import { z } from "zod"
-import { submitMessage } from "@/lib/supabase/client"
+import nodemailer from "nodemailer"
+import { supabase } from "@/lib/supabase"
 
 // Form validation schema
 const contactFormSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
   email: z.string().email({ message: "Valid email is required" }),
-  subject: z.string().optional(),
   message: z.string().min(10, { message: "Message must be at least 10 characters" }),
 })
 
@@ -18,11 +18,10 @@ export async function submitContactForm(formData: FormData) {
     // Extract form data
     const name = formData.get("name") as string
     const email = formData.get("email") as string
-    const subject = (formData.get("subject") as string) || undefined
     const message = formData.get("message") as string
 
     // Validate form data
-    const result = contactFormSchema.safeParse({ name, email, subject, message })
+    const result = contactFormSchema.safeParse({ name, email, message })
 
     if (!result.success) {
       return {
@@ -32,12 +31,54 @@ export async function submitContactForm(formData: FormData) {
     }
 
     // Save contact message to Supabase
-    await submitMessage({
-      name,
-      email,
-      subject,
-      body: message,
+    const { error: dbError } = await supabase
+      .from('contact_messages')
+      .insert([
+        {
+          name,
+          email,
+          message,
+          created_at: new Date().toISOString(),
+        }
+      ])
+
+    if (dbError) {
+      console.error("Supabase error:", dbError)
+      // Continue with email sending even if DB fails
+    }
+
+    // Create email transporter
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER || "your-email@gmail.com",
+        pass: process.env.EMAIL_PASSWORD || "your-app-password",
+      },
     })
+
+    // Email content
+    const mailOptions = {
+      from: process.env.EMAIL_USER || "your-email@gmail.com",
+      to: "dornaseason@gmail.com",
+      subject: `Contact Form: Message from ${name}`,
+      text: `
+        Name: ${name}
+        Email: ${email}
+        
+        Message:
+        ${message}
+      `,
+      html: `
+        <h2>New Contact Form Submission</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <h3>Message:</h3>
+        <p>${message.replace(/\n/g, "<br>")}</p>
+      `,
+    }
+
+    // Send email
+    await transporter.sendMail(mailOptions)
 
     return {
       success: true,

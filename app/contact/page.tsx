@@ -83,17 +83,6 @@ export default function ContactPage() {
               />
             </div>
             <div>
-              <label htmlFor="subject" className="block text-sm font-medium">
-                Subject (optional)
-              </label>
-              <input
-                type="text"
-                id="subject"
-                name="subject"
-                className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              />
-            </div>
-            <div>
               <label htmlFor="message" className="block text-sm font-medium">
                 Message
               </label>
