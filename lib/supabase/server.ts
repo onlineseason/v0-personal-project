@@ -4,14 +4,18 @@ import { cookies } from 'next/headers'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-if (!supabaseUrl) {
-  const error = 'Missing NEXT_PUBLIC_SUPABASE_URL environment variable'
-  console.error('[Supabase Server]', error)
-  throw new Error(error)
+// Lazy validation - only throw when actually used
+function validateSupabaseUrl() {
+  if (!supabaseUrl) {
+    const error = 'Missing NEXT_PUBLIC_SUPABASE_URL environment variable'
+    console.error('[Supabase Server]', error)
+    throw new Error(error)
+  }
 }
 
 // Service role client for admin operations
 export function getServiceClient() {
+  validateSupabaseUrl()
   if (!supabaseServiceKey) {
     const error = 'Missing SUPABASE_SERVICE_ROLE_KEY environment variable (required for admin operations)'
     console.error('[Supabase Server]', error)
@@ -27,6 +31,7 @@ export function getServiceClient() {
 
 // Client with session for authenticated requests
 export async function getSessionClient() {
+  validateSupabaseUrl()
   const cookieStore = await cookies()
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 

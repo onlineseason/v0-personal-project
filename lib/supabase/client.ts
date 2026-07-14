@@ -3,15 +3,31 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-if (!supabaseUrl || !supabaseKey) {
-  const missing = []
-  if (!supabaseUrl) missing.push('NEXT_PUBLIC_SUPABASE_URL')
-  if (!supabaseKey) missing.push('NEXT_PUBLIC_SUPABASE_ANON_KEY')
-  console.error('[Supabase] Missing environment variables:', missing.join(', '))
-  throw new Error(`Missing Supabase environment variables: ${missing.join(', ')}`)
+// Lazy initialize - only throw when actually used, not at module load time
+let supabaseClient: ReturnType<typeof createClient> | null = null
+
+function getSupabaseClient() {
+  if (supabaseClient) return supabaseClient
+
+  if (!supabaseUrl || !supabaseKey) {
+    const missing = []
+    if (!supabaseUrl) missing.push('NEXT_PUBLIC_SUPABASE_URL')
+    if (!supabaseKey) missing.push('NEXT_PUBLIC_SUPABASE_ANON_KEY')
+    const errorMsg = `Missing Supabase environment variables: ${missing.join(', ')}`
+    console.error('[Supabase]', errorMsg)
+    throw new Error(errorMsg)
+  }
+
+  supabaseClient = createClient(supabaseUrl, supabaseKey)
+  return supabaseClient
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
+export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
+  get: (target, prop) => {
+    const client = getSupabaseClient()
+    return (client as any)[prop]
+  },
+})
 
 // Types for the database schema
 export interface Project {
