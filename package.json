@@ -10,10 +10,13 @@
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",
+    "@hookform/resolvers": "^5.4.0",
     "@radix-ui/react-slot": "^1.0.2",
     "@supabase/supabase-js": "^2.45.4",
+    "@uiw/react-md-editor": "^4.1.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "cmdk": "^1.1.1",
     "framer-motion": "^10.16.4",
     "lucide-react": "^0.292.0",
     "next": "^14.2.35",
@@ -21,6 +24,9 @@
     "nodemailer": "^6.9.7",
     "react": "^18",
     "react-dom": "^18",
+    "react-markdown": "^10.1.0",
+    "recharts": "^3.9.2",
+    "remark-gfm": "^4.0.1",
     "tailwind-merge": "^2.0.0",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.22.4"

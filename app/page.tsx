@@ -1,27 +1,23 @@
-"use client"
-
+import React from "react"
 import { motion } from "framer-motion"
-import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import ProjectCard from "@/components/project-card"
-import { projects } from "@/data/projects"
+import { CommandPalette } from "@/components/command-palette"
+import { getPublishedProjects } from "@/lib/supabase/client"
 import Image from "next/image"
 
 const roles = ["Entrepreneur", "Engineer", "Digital Advocate"]
 
-export default function Home() {
-  const [roleIndex, setRoleIndex] = useState(0)
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRoleIndex((prev) => (prev + 1) % roles.length)
-    }, 2000)
-    return () => clearInterval(interval)
-  }, [])
+export default async function Home() {
+  const projects = await getPublishedProjects()
 
   return (
     <div className="flex flex-col">
+      <CommandPalette 
+        projects={projects.map(p => ({ slug: p.slug, title: p.title }))}
+      />
+
       {/* Hero Section */}
       <section className="hero-gradient py-20 md:py-32">
         <div className="container">
@@ -34,15 +30,7 @@ export default function Home() {
             >
             Dorna Raj Budthapa
             </motion.h1>
-            <motion.div
-              key={roles[roleIndex]}
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="mt-4 h-8 text-xl font-medium text-white md:text-2xl"
-            >
-              {roles[roleIndex]}
-            </motion.div>
+            <RoleTyper roles={roles} />
             <div className="mt-8 flex flex-col space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
               <Link
                 href="#projects"
@@ -67,7 +55,17 @@ export default function Home() {
           </div>
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {projects.slice(0, 3).map((project) => (
-              <ProjectCard key={project.id} project={project} />
+              <ProjectCard 
+                key={project.id} 
+                project={{
+                  id: project.id,
+                  title: project.title,
+                  description: project.description || "",
+                  image: project.image_url || "/placeholder.svg",
+                  link: project.link,
+                  tags: project.tags,
+                }}
+              />
             ))}
           </div>
           <div className="mt-12 text-center">
@@ -174,5 +172,28 @@ export default function Home() {
         </div>
       </section>
     </div>
+  )
+}
+
+function RoleTyper({ roles }: { roles: string[] }) {
+  const [roleIndex, setRoleIndex] = React.useState(0)
+  
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setRoleIndex((prev) => (prev + 1) % roles.length)
+    }, 2000)
+    return () => clearInterval(interval)
+  }, [roles.length])
+
+  return (
+    <motion.div
+      key={roles[roleIndex]}
+      initial={{ y: 20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+      className="mt-4 h-8 text-xl font-medium text-white md:text-2xl"
+    >
+      {roles[roleIndex]}
+    </motion.div>
   )
 }
