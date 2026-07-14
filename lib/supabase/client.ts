@@ -1,10 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Missing Supabase environment variables')
+  const missing = []
+  if (!supabaseUrl) missing.push('NEXT_PUBLIC_SUPABASE_URL')
+  if (!supabaseKey) missing.push('NEXT_PUBLIC_SUPABASE_ANON_KEY')
+  console.error('[Supabase] Missing environment variables:', missing.join(', '))
+  throw new Error(`Missing Supabase environment variables: ${missing.join(', ')}`)
 }
 
 export const supabase = createClient(supabaseUrl, supabaseKey)
@@ -51,58 +55,143 @@ export interface Message {
 
 // Database helper functions
 export async function getPublishedProjects() {
-  const { data, error } = await supabase
-    .from('projects')
-    .select('*')
-    .eq('published', true)
-    .order('sort_order', { ascending: true })
+  try {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('published', true)
+      .order('sort_order', { ascending: true })
 
-  if (error) throw error
-  return data as Project[]
+    if (error) {
+      console.error('[Supabase] Error fetching projects:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      })
+      throw error
+    }
+    return data as Project[]
+  } catch (err) {
+    console.error('[Supabase] Failed to fetch projects:', err)
+    throw err
+  }
 }
 
 export async function getProjectBySlug(slug: string) {
-  const { data, error } = await supabase
-    .from('projects')
-    .select('*')
-    .eq('slug', slug)
-    .eq('published', true)
-    .single()
+  try {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('slug', slug)
+      .eq('published', true)
+      .maybeSingle()
 
-  if (error) throw error
-  return data as Project
+    if (error) {
+      console.error('[Supabase] Error fetching project by slug:', {
+        slug,
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      })
+      throw error
+    }
+
+    if (!data) {
+      console.warn('[Supabase] Project not found for slug:', slug)
+      return null
+    }
+
+    return data as Project
+  } catch (err) {
+    console.error('[Supabase] Failed to fetch project by slug:', slug, err)
+    throw err
+  }
 }
 
 export async function getPublishedPosts() {
-  const { data, error } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('published', true)
-    .order('published_at', { ascending: false })
+  try {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('published', true)
+      .order('published_at', { ascending: false })
 
-  if (error) throw error
-  return data as Post[]
+    if (error) {
+      console.error('[Supabase] Error fetching posts:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      })
+      throw error
+    }
+    return data as Post[]
+  } catch (err) {
+    console.error('[Supabase] Failed to fetch posts:', err)
+    throw err
+  }
 }
 
 export async function getPostBySlug(slug: string) {
-  const { data, error } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('slug', slug)
-    .eq('published', true)
-    .single()
+  try {
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('slug', slug)
+      .eq('published', true)
+      .maybeSingle()
 
-  if (error) throw error
-  return data as Post
+    if (error) {
+      console.error('[Supabase] Error fetching post by slug:', {
+        slug,
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      })
+      throw error
+    }
+
+    if (!data) {
+      console.warn('[Supabase] Post not found for slug:', slug)
+      return null
+    }
+
+    return data as Post
+  } catch (err) {
+    console.error('[Supabase] Failed to fetch post by slug:', slug, err)
+    throw err
+  }
 }
 
 export async function submitMessage(message: Omit<Message, 'id' | 'read' | 'created_at'>) {
-  const { data, error } = await supabase
-    .from('messages')
-    .insert([message])
-    .select()
-    .single()
+  try {
+    const { data, error } = await supabase
+      .from('messages')
+      .insert([message])
+      .select()
+      .maybeSingle()
 
-  if (error) throw error
-  return data as Message
+    if (error) {
+      console.error('[Supabase] Error submitting message:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      })
+      throw error
+    }
+
+    if (!data) {
+      console.warn('[Supabase] Message insert returned no data')
+      return null
+    }
+
+    return data as Message
+  } catch (err) {
+    console.error('[Supabase] Failed to submit message:', err)
+    throw err
+  }
 }

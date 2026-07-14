@@ -1,19 +1,23 @@
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 if (!supabaseUrl) {
-  throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL')
+  const error = 'Missing NEXT_PUBLIC_SUPABASE_URL environment variable'
+  console.error('[Supabase Server]', error)
+  throw new Error(error)
 }
 
 // Service role client for admin operations
 export function getServiceClient() {
   if (!supabaseServiceKey) {
-    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY')
+    const error = 'Missing SUPABASE_SERVICE_ROLE_KEY environment variable (required for admin operations)'
+    console.error('[Supabase Server]', error)
+    throw new Error(error)
   }
-  return createClient(supabaseUrl, supabaseServiceKey, {
+  return createClient(supabaseUrl!, supabaseServiceKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
@@ -24,9 +28,15 @@ export function getServiceClient() {
 // Client with session for authenticated requests
 export async function getSessionClient() {
   const cookieStore = await cookies()
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  const client = createClient(supabaseUrl, supabaseAnonKey)
+  if (!supabaseAnonKey) {
+    const error = 'Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable'
+    console.error('[Supabase Server]', error)
+    throw new Error(error)
+  }
+
+  const client = createClient(supabaseUrl!, supabaseAnonKey)
 
   // Reconstruct session from cookies if available
   const authCookie = cookieStore.get('sb-auth-token')
